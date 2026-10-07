@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>❤️Feliz aniversario❤️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     🎨 PALETA DE COLORES — puedes cambiar estos valores
+     ============================================================ */
+  :root{
+    --cielo-1:#c8ccff;
+    --cielo-2:#a7b0ff;
+    --cielo-3:#ce93ff;
+    --rosa:#ff838d;
+    --rosa-fuerte:#ff80a8;
+    --lavanda:#ddb3ff;
+    --menta:#a8e6cf;
+    --crema:#fff7f0;
+    --texto:#343b77;
+    --dorado:#ffd76b;
+    --sombra:#5b4988;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    overflow:hidden;
+    background:linear-gradient(180deg,var(--cielo-1),var(--cielo-2));
+    font-family:'Quicksand',sans-serif;
+    color:var(--texto);
+    touch-action:none;
+  }
+  .pixel{ font-family:'Press Start 2P',monospace; }
+
+  button{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    cursor:pointer;
+    border:none;
+    outline:none;
+    background:none;
+  }
+  button:focus-visible{ outline:3px solid var(--rosa-fuerte); outline-offset:3px; }
+
+  .btn-principal{
+    font-family:'Press Start 2P',monospace;
+    font-size:13px;
+    padding:16px 26px;
+    color:#fff;
+    background:linear-gradient(180deg,var(--rosa),var(--rosa-fuerte));
+    border-radius:14px;
+    box-shadow:0 5px 0 #a82454, 0 8px 18px rgba(230,57,113,.35);
+    letter-spacing:.5px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-principal:hover{ transform:translateY(-2px); }
+  .btn-principal:active{ transform:translateY(3px); box-shadow:0 2px 0 #a82454; }
+
+  /* ============================================================
+     PANTALLA DE INICIO
+     ============================================================ */
+  #startScreen, #victoryScreen, #letterScreen{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    z-index:50;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.5), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,.4), transparent 45%),
+      linear-gradient(160deg,var(--cielo-1),var(--cielo-2) 55%, var(--cielo-3));
+    padding:24px;
+    overflow:hidden;
+  }
+  .titulo-inicio{
+    font-size:clamp(16px,4vw,26px);
+    line-height:1.8;
+    margin:0 0 34px;
+    text-shadow:2px 2px 0 rgba(255,255,255,.7);
+    max-width:600px;
+  }
+  .subtitulo{
+    font-family:'Quicksand',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    opacity:.75;
+    margin-top:18px;
+  }
+
+  /* corazones/flores flotando de fondo, reutilizado en varias pantallas */
+  .flotante{
+    position:absolute;
+    pointer-events:none;
+    animation:flotar linear infinite;
+    opacity:.85;
+    will-change:transform;
+  }
+  @keyframes flotar{
+    0%{ transform:translateY(110vh) rotate(0deg); opacity:0; }
+    10%{ opacity:.9; }
+    90%{ opacity:.7; }
+    100%{ transform:translateY(-10vh) rotate(25deg); opacity:0; }
+  }
+
+  /* ============================================================
+     JUEGO
+     ============================================================ */
+  #gameContainer{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    background:var(--cielo-2);
+  }
+  #canvasWrap{
+    position:relative;
+    width:100%;
+    max-width:960px;
+    aspect-ratio:960/540;
+    margin:auto;
+  }
+  #gameCanvas{
+    width:100%; height:100%;
+    display:block;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(107,91,149,.35);
+    background:#cfe6ff;
+    image-rendering:pixelated;
+  }
+
+  #hud{
+    position:absolute;
+    top:14px; left:14px;
+    font-family:'Press Start 2P',monospace;
+    font-size:12px;
+    color:var(--texto);
+    background:rgba(255,247,240,.85);
+    padding:8px 14px;
+    border-radius:10px;
+    box-shadow:0 3px 0 rgba(107,91,149,.3);
+    z-index:5;
+    pointer-events:none;
+  }
+
+  #instrucciones{
+    position:absolute;
+    top:14px; right:14px;
+    font-size:11px;
+    background:rgba(255,247,240,.85);
+    padding:6px 12px;
+    border-radius:10px;
+    z-index:5;
+    pointer-events:none;
+    max-width:150px;
+    line-height:1.4;
+  }
+
+  /* controles táctiles */
+  #touchControls{
+    position:absolute;
+    inset:0;
+    display:none;
+    pointer-events:none;
+    z-index:6;
+  }
+  .touch-btn{
+    position:absolute;
+    bottom:18px;
+    width:64px; height:64px;
+    border-radius:50%;
+    background:rgba(255,255,255,.55);
+    border:2px solid rgba(107,91,149,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    pointer-events:auto;
+    color:var(--texto);
+    user-select:none;
+  }
+  .touch-btn:active{ background:rgba(255,255,255,.85); }
+  #btnLeft{ left:18px; }
+  #btnRight{ left:92px; }
+  #btnJump{ right:18px; width:78px; height:78px; }
+
+  @media (pointer:coarse){
+    #touchControls{ display:block; }
+  }
+
+  /* ============================================================
+     PANTALLA DE VICTORIA
+     ============================================================ */
+  #victoryScreen{ display:none; }
+  .victoria-titulo{
+    font-size:clamp(18px,4vw,30px);
+    margin-bottom:10px;
+    text-shadow:2px 2px 0 rgba(255,255,255,.7);
+  }
+  .victoria-sub{
+    font-family:'Quicksand',sans-serif;
+    font-weight:600;
+    font-size:17px;
+    margin:14px 0 30px;
+    max-width:480px;
+  }
+
+  #confetti{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:45;
+    overflow:hidden;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-10%;
+    font-size:20px;
+    animation:caer linear forwards;
+  }
+  @keyframes caer{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(115vh) rotate(360deg); opacity:.3; }
+  }
+
+  /* ============================================================
+     PANTALLA DE LA CARTA
+     ============================================================ */
+  #letterScreen{ display:none; }
+  .letter-title{
+    font-size:clamp(15px,3.4vw,22px);
+    margin-bottom:36px;
+    text-shadow:2px 2px 0 rgba(255,255,255,.7);
+  }
+
+  #envelope{
+    position:relative;
+    width:220px; height:150px;
+    cursor:pointer;
+    filter:drop-shadow(0 10px 18px rgba(107,91,149,.4));
+  }
+  #envelope .cuerpo{
+    position:absolute; inset:0;
+    background:linear-gradient(160deg,var(--crema),#ffe3ef);
+    border:3px solid var(--rosa-fuerte);
+    border-radius:8px;
+  }
+  #envelope .solapa{
+    position:absolute;
+    top:-3px; left:-3px; right:-3px;
+    height:80px;
+    background:linear-gradient(160deg,var(--rosa),var(--rosa-fuerte));
+    clip-path:polygon(0 0, 100% 0, 50% 90%);
+    border-radius:8px 8px 0 0;
+    transform-origin:top;
+    transition:transform .7s cubic-bezier(.2,1.4,.4,1);
+    z-index:3;
+  }
+  #envelope.abierto .solapa{ transform:rotateX(180deg); }
+  #envelope .corazon-sello{
+    position:absolute; top:34px; left:50%; transform:translateX(-50%);
+    font-size:26px; z-index:4;
+    animation:latido 1.4s ease-in-out infinite;
+  }
+  #envelope.abierto .corazon-sello{ display:none; }
+  @keyframes latido{
+    0%,100%{ transform:translateX(-50%) scale(1); }
+    50%{ transform:translateX(-50%) scale(1.15); }
+  }
+  #envelope .toque{
+    position:absolute; bottom:8px; width:100%; text-align:center;
+    font-size:11px; color:var(--sombra); opacity:.8;
+  }
+
+  #cartaBox{
+    display:none;
+    max-width:560px;
+    width:92%;
+    max-height:78vh;
+    background:var(--crema);
+    border:3px solid var(--rosa-fuerte);
+    border-radius:16px;
+    padding:30px 26px;
+    box-shadow:0 16px 40px rgba(107,91,149,.4);
+    overflow-y:auto;
+    animation:aparecerCarta .6s ease;
+  }
+  @keyframes aparecerCarta{
+    0%{ opacity:0; transform:translateY(30px) scale(.95); }
+    100%{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  #cartaTexto{
+    font-size:15.5px;
+    line-height:1.75;
+    text-align:left;
+    white-space:pre-wrap;
+    font-weight:600;
+  }
+  .cursor-escritura{
+    display:inline-block;
+    width:2px;
+    background:var(--rosa-fuerte);
+    margin-left:2px;
+    animation:parpadeo .8s steps(1) infinite;
+  }
+  @keyframes parpadeo{ 50%{ opacity:0; } }
+
+  #cartaFirma{
+    margin-top:22px;
+    font-family:'Press Start 2P',monospace;
+    font-size:15px;
+    color:var(--rosa-fuerte);
+    opacity:0;
+    transition:opacity 1s ease;
+  }
+
+  #volverJugar{
+    margin-top:26px;
+    opacity:0;
+    transition:opacity 1s ease;
+  }
+
+  .oculto{ display:none !important; }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--lavanda); border-radius:4px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .flotante, .confetti-piece, #envelope .corazon-sello { animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA 1: INICIO
+     ============================================================ -->
+<div id="startScreen">
+  <div id="startDecor"></div>
+  <h1 class="titulo-inicio pixel">Un pequeño juego<br>para ti ❤️</h1>
+  <button class="btn-principal" id="btnComenzar">Comenzar aventura🎮</button>
+  <p class="subtitulo">Usa las flechas o A/D para moverte, y espacio para saltar</p>
+</div>
+
+<!-- ============================================================
+     PANTALLA 2: JUEGO
+     ============================================================ -->
+<div id="gameContainer">
+  <div id="canvasWrap">
+    <canvas id="gameCanvas" width="960" height="540"></canvas>
+    <div id="hud">❤️ Monedas: <span id="contadorMonedas">0</span> / <span id="totalMonedas">10</span></div>
+    <div id="instrucciones">← → / A D: moverte<br>Espacio / W: saltar</div>
+    <div id="touchControls">
+      <div class="touch-btn" id="btnLeft">⬅️</div>
+      <div class="touch-btn" id="btnRight">➡️</div>
+      <div class="touch-btn" id="btnJump">⬆️</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANTALLA 3: VICTORIA
+     ============================================================ -->
+<div id="victoryScreen">
+  <div id="victoryDecor"></div>
+  <h2 class="victoria-titulo pixel">¡Lo lograste!</h2>
+  <p class="victoria-sub">Pero este nivel tenía un premio especial para ti...</p>
+  <button class="btn-principal" id="btnAbrirRegalo">Abrir mi regalo 💌</button>
+</div>
+<div id="confetti"></div>
+
+<!-- ============================================================
+     PANTALLA 4: CARTA
+     ============================================================ -->
+<div id="letterScreen">
+  <div id="letterDecor"></div>
+  <h2 class="letter-title pixel">Para mi preciadx esposx 💗</h2>
+
+  <div id="envelope">
+    <div class="solapa"></div>
+    <div class="corazon-sello">💌</div>
+    <div class="cuerpo"></div>
+    <div class="toque">toca para abrir</div>
+  </div>
+
+  <div id="cartaBox">
+    <div id="cartaTexto"></div>
+    <div id="cartaFirma" class="pixel">Te amo ❤️</div>
+    <button class="btn-principal oculto" id="volverJugar">Volver a jugar 🎮</button>
+  </div>
+</div>
+
+<audio id="musicaFondo" loop></audio>
+
+<script>
+/* ================================================================
+   🔧 ZONA DE PERSONALIZACIÓN — edita libremente todo lo de aquí
+   ================================================================ */
+const CONFIG = {
+  // 🔧 Nombre de tu pareja (se puede usar dentro del texto de la carta)
+  PAREJA_NOMBRE: "mi huroncito",
+
+  // 🔧 Cantidad de monedas del nivel
+  NUM_MONEDAS: 10,
+
+  // 🔧 Velocidad de movimiento del personaje (más alto = más rápido)
+  VELOCIDAD_JUGADOR: 4,
+
+  // 🔧 Fuerza de salto (más alto = salta más)
+  FUERZA_SALTO: 13.5,
+
+  // 🔧 Nivel de dificultad -> controla la gravedad (más alto = cae más rápido / más difícil)
+  GRAVEDAD: 0.62,
+
+  // 🔧 Enlace de música (mp3, ogg...) para reproducir en la carta. Déjalo vacío ("") si no quieres música.
+  MUSICA_URL: "",
+
+  // 🔧 Frases decorativas que aparecen flotando en el escenario
+  FRASES_ESCENARIO: [
+    "Te amo ❤️",
+    "Eres mi persona favorita",
+    "Siempre juntos",
+    "Mi lugar favorito eres tú",
+    "Gracias por existir"
+
+  ],
+
+  // 🔧 Texto completo de la carta de amor (puedes reescribirlo por completo)
+  CARTA_TEXTO:
+`hola preciosx, queria agradecerte por este año juntos, por todos los momentos bonitos que me has regalado y me sigues dando cada dia, pensar que hace un año pude dar un paso importante con una personita tan increible me hace muy feliz de recordarlo, nunca habia estado tan feliz de compartir mi vida con alguien hasta que llegaste tu a mi vida y mejoraste todo, desde mi forma de pensar hasta mi forma de amar, no hay persona con quien quiera estar mas que contigo todo lo que pueda y formar parte de tu vida hasta donde podamos, eres lo mas preciado y bonito que puedo yo tener en esta vida y espero poder amarte muchos mas años de mi vida, mi preciosx huroncito.
+
+Te amo muchísimo. ❤️
+
+Este pequeño juego termina aquí, pero nuestra historia espero que tenga muchísimos niveles más.`,
+
+  // 🔧 Colores principales (también puedes cambiarlos arriba en :root del CSS)
+  COLORES: {
+    personaje: "#ff8fb3",
+    personajeSombra: "#e63971",
+    plataformaA: "#b8a9f5",
+    plataformaB: "#a8e6cf",
+    plataformaBorde: "#6b5b95"
+  }
+};
+
+/* ================================================================
+   ESTADO GENERAL
+   ================================================================ */
+document.getElementById('totalMonedas').textContent = CONFIG.NUM_MONEDAS;
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;   // resolución lógica fija: el CSS la escala para que sea responsive
+const H = canvas.height;
+
+let monedasRecolectadas = 0;
+let juegoActivo = false;
+let tiempo = 0;
+
+/* ---------------- input ---------------- */
+const teclas = { izq:false, der:false, salto:false };
+
+window.addEventListener('keydown', e=>{
+  if(['ArrowLeft','a','A'].includes(e.key)) teclas.izq = true;
+  if(['ArrowRight','d','D'].includes(e.key)) teclas.der = true;
+  if([' ','w','W','ArrowUp'].includes(e.key)){ teclas.salto = true; e.preventDefault(); }
+});
+window.addEventListener('keyup', e=>{
+  if(['ArrowLeft','a','A'].includes(e.key)) teclas.izq = false;
+  if(['ArrowRight','d','D'].includes(e.key)) teclas.der = false;
+  if([' ','w','W','ArrowUp'].includes(e.key)) teclas.salto = false;
+});
+
+function ligarBotonTactil(id, prop){
+  const el = document.getElementById(id);
+  const on = ev=>{ teclas[prop]=true; ev.preventDefault(); };
+  const off = ev=>{ teclas[prop]=false; ev.preventDefault(); };
+  el.addEventListener('touchstart', on, {passive:false});
+  el.addEventListener('touchend', off, {passive:false});
+  el.addEventListener('touchcancel', off, {passive:false});
+  el.addEventListener('mousedown', on);
+  el.addEventListener('mouseup', off);
+  el.addEventListener('mouseleave', off);
+}
+ligarBotonTactil('btnLeft','izq');
+ligarBotonTactil('btnRight','der');
+ligarBotonTactil('btnJump','salto');
+
+/* ================================================================
+   🌍 GENERACIÓN DEL MUNDO
+   ================================================================ */
+const WORLD_WIDTH = 3600;
+const GROUND_Y = 460;
+
+let plataformas, monedas, obstaculos, decoraciones, meta, player, particulas, nubes, estrellas, corazonesAmbiente;
+
+function generarMundo(){
+  // suelo continuo + plataformas flotantes
+  plataformas = [
+    { x:0, y:GROUND_Y, w:WORLD_WIDTH, h:H-GROUND_Y, color:'suelo' }
+  ];
+
+  const plataformasFlotantes = [
+    {x:520,  y:360, w:130},
+    {x:820,  y:300, w:110},
+    {x:1150, y:380, w:140},
+    {x:1480, y:300, w:110},
+    {x:1820, y:350, w:150},
+    {x:2150, y:280, w:120},
+    {x:2480, y:360, w:140},
+    {x:2820, y:300, w:120},
+    {x:3120, y:370, w:150}
+  ];
+  plataformasFlotantes.forEach(p=>{
+    plataformas.push({ x:p.x, y:p.y, w:p.w, h:22, color:'flotante' });
+  });
+
+  // pequeños obstáculos en el suelo que hay que saltar
+  obstaculos = [380, 900, 1500, 2100, 2650, 3250].map(x=>({
+    x, y:GROUND_Y-28, w:26, h:28
+  }));
+
+  // monedas: repartidas por el suelo y sobre las plataformas flotantes
+  monedas = [];
+  const totalPosiblesSpots = [
+    {x:250, y:GROUND_Y-40}, {x:585, y:325}, {x:885, y:265},
+    {x:1080, y:GROUND_Y-40}, {x:1215, y:345}, {x:1545, y:265},
+    {x:1750, y:GROUND_Y-40}, {x:1885, y:315}, {x:2215, y:245},
+    {x:2400, y:GROUND_Y-40}, {x:2545, y:325}, {x:2885, y:265},
+    {x:3050, y:GROUND_Y-40}, {x:3185, y:335}, {x:3400, y:GROUND_Y-40}
+  ];
+  const n = Math.min(CONFIG.NUM_MONEDAS, totalPosiblesSpots.length);
+  for(let i=0;i<n;i++){
+    const spot = totalPosiblesSpots[i];
+    monedas.push({ x:spot.x, y:spot.y, r:12, viva:true, giro:Math.random()*Math.PI*2 });
+  }
+  document.getElementById('totalMonedas').textContent = n;
+
+  // frases decorativas flotando por el escenario (no bloquean el paso)
+  decoraciones = [];
+  const posicionesFrases = [300, 950, 1650, 2350, 3000];
+  posicionesFrases.forEach((x,i)=>{
+    decoraciones.push({
+      x, y: 130 + (i%2)*30,
+      texto: CONFIG.FRASES_ESCENARIO[i % CONFIG.FRASES_ESCENARIO.length]
+    });
+  });
+
+  // meta final
+  meta = { x: WORLD_WIDTH-160, y: GROUND_Y-170, alcanzada:false };
+
+  // jugador
+  player = {
+    x:60, y:GROUND_Y-46, w:30, h:46,
+    vx:0, vy:0, onGround:false,
+    mirando:1, // 1 derecha, -1 izquierda
+    caminando:false, cicloAnim:0
+  };
+
+  particulas = [];
+
+  // capas decorativas ambientales (no afectan el juego)
+  nubes = Array.from({length:9},(_,i)=>({
+    x: i*450 + Math.random()*200,
+    y: 40 + Math.random()*110,
+    escala: .7 + Math.random()*.8
+  }));
+  estrellas = Array.from({length:40},()=>({
+    x: Math.random()*WORLD_WIDTH,
+    y: Math.random()*220,
+    fase: Math.random()*Math.PI*2
+  }));
+  corazonesAmbiente = Array.from({length:14},()=>({
+    x: Math.random()*W,
+    y: Math.random()*H,
+    vel: 0.3 + Math.random()*.5,
+    escala: .5 + Math.random()*.6,
+    fase: Math.random()*Math.PI*2
+  }));
+}
+
+/* ================================================================
+   🔊 SONIDOS SENCILLOS (sintetizados, sin archivos externos)
+   ================================================================ */
+let audioCtx = null;
+function beep(freq, duracion, tipo='sine', vol=.15){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = tipo;
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracion);
+    osc.stop(audioCtx.currentTime + duracion);
+  }catch(e){ /* audio no disponible, seguimos sin sonido */ }
+}
+function sonidoSalto(){ beep(520,.15,'square',.08); }
+function sonidoMoneda(){ beep(880,.12,'sine',.12); setTimeout(()=>beep(1180,.12,'sine',.1),60); }
+function sonidoVictoria(){ [660,880,990,1320].forEach((f,i)=>setTimeout(()=>beep(f,.25,'sine',.1), i*130)); }
+
+/* ================================================================
+   🔁 BUCLE DEL JUEGO
+   ================================================================ */
+let camaraX = 0;
+
+function actualizar(){
+  tiempo++;
+
+  // --- movimiento horizontal ---
+  player.caminando = false;
+  if(teclas.izq){ player.vx = -CONFIG.VELOCIDAD_JUGADOR; player.mirando=-1; player.caminando=true; }
+  else if(teclas.der){ player.vx = CONFIG.VELOCIDAD_JUGADOR; player.mirando=1; player.caminando=true; }
+  else{ player.vx = 0; }
+
+  if(player.caminando) player.cicloAnim += 0.25;
+
+  // --- salto ---
+  if(teclas.salto && player.onGround){
+    player.vy = -CONFIG.FUERZA_SALTO;
+    player.onGround = false;
+    sonidoSalto();
+  }
+
+  // --- gravedad ---
+  player.vy += CONFIG.GRAVEDAD;
+  if(player.vy > 22) player.vy = 22;
+
+  // --- eje X con colisión (plataformas + obstáculos) ---
+  player.x += player.vx;
+  const solidos = [...plataformas.filter(p=>p.color==='flotante'), ...obstaculos];
+  solidos.forEach(s=>{
+    if(rectChocan(player, s)){
+      if(player.vx > 0) player.x = s.x - player.w;
+      else if(player.vx < 0) player.x = s.x + s.w;
+    }
+  });
+  if(player.x < 0) player.x = 0;
+  if(player.x > WORLD_WIDTH - player.w) player.x = WORLD_WIDTH - player.w;
+
+  // --- eje Y con colisión ---
+  player.onGround = false;
+  player.y += player.vy;
+
+  // suelo
+  const suelo = plataformas[0];
+  if(rectChocan(player, suelo) && player.vy >= 0){
+    player.y = suelo.y - player.h;
+    player.vy = 0;
+    player.onGround = true;
+  }
+
+  // plataformas flotantes + obstáculos (aterrizar encima)
+  [...plataformas.filter(p=>p.color==='flotante'), ...obstaculos].forEach(s=>{
+    if(rectChocan(player, s)){
+      if(player.vy >= 0 && (player.y + player.h - player.vy) <= s.y + 1){
+        player.y = s.y - player.h;
+        player.vy = 0;
+        player.onGround = true;
+      } else if(player.vy < 0 && (player.y - player.vy) >= s.y + s.h - 1){
+        player.y = s.y + s.h;
+        player.vy = 0;
+      }
+    }
+  });
+
+  // --- monedas ---
+  monedas.forEach(m=>{
+    if(!m.viva) return;
+    m.giro += 0.12;
+    const dx = (player.x+player.w/2) - m.x;
+    const dy = (player.y+player.h/2) - m.y;
+    if(Math.sqrt(dx*dx+dy*dy) < 30){
+      m.viva = false;
+      monedasRecolectadas++;
+      document.getElementById('contadorMonedas').textContent = monedasRecolectadas;
+      sonidoMoneda();
+      for(let i=0;i<10;i++){
+        particulas.push({
+          x:m.x, y:m.y,
+          vx:(Math.random()-.5)*4, vy:(Math.random()-.5)*4-1,
+          vida:28, color:'#ffd76b'
+        });
+      }
+    }
+  });
+
+  // --- partículas ---
+  particulas.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.08; p.vida--; });
+  particulas = particulas.filter(p=>p.vida>0);
+
+  // --- ambientales ---
+  corazonesAmbiente.forEach(c=>{
+    c.y -= c.vel;
+    c.fase += 0.02;
+    if(c.y < -20){ c.y = H+20; c.x = Math.random()*W; }
+  });
+
+  // --- cámara ---
+  camaraX = Math.max(0, Math.min(player.x - W/2, WORLD_WIDTH - W));
+
+  // --- meta ---
+  if(!meta.alcanzada && player.x > meta.x - 50){
+    meta.alcanzada = true;
+    ganarNivel();
+  }
+
+  // --- caída al vacío (seguridad) ---
+  if(player.y > H + 120){
+    player.x = 60; player.y = GROUND_Y-46; player.vy = 0;
+  }
+}
+
+function rectChocan(a, b){
+  return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+}
+
+/* ================================================================
+   🎨 DIBUJO
+   ================================================================ */
+function dibujar(){
+  // --- cielo ---
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#ffd6ec');
+  grad.addColorStop(.55,'#cfe6ff');
+  grad.addColorStop(1,'#fff1de');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // --- estrellas (parte alta, brillo suave) ---
+  estrellas.forEach(s=>{
+    const sx = s.x - camaraX*0.5;
+    if(sx < -10 || sx > W+10) return;
+    const alpha = 0.35 + Math.sin(tiempo*0.05 + s.fase)*0.35;
+    ctx.fillStyle = `rgba(255,255,255,${Math.max(0,alpha)})`;
+    ctx.beginPath();
+    ctx.arc(sx, s.y, 2, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  // --- nubes (parallax lento) ---
+  nubes.forEach(n=>{
+    const nx = n.x - camaraX*0.3;
+    if(nx < -150 || nx > W+150) return;
+    dibujarNube(nx, n.y, n.escala);
+  });
+
+  // --- corazones ambientales (fijos a pantalla, encima del fondo) ---
+  corazonesAmbiente.forEach(c=>{
+    ctx.save();
+    ctx.globalAlpha = 0.35 + Math.sin(c.fase)*0.15;
+    ctx.font = `${18*c.escala}px sans-serif`;
+    ctx.fillText('💗', c.x, c.y);
+    ctx.restore();
+  });
+
+  ctx.save();
+  ctx.translate(-camaraX, 0);
+
+  // --- flores decorativas en el suelo ---
+  for(let x=40; x<WORLD_WIDTH; x+=170){
+    dibujarFlor(x, GROUND_Y-6);
+  }
+
+  // --- frases decorativas ---
+  decoraciones.forEach(d=>{
+    ctx.save();
+    ctx.globalAlpha = 0.55 + Math.sin(tiempo*0.03 + d.x)*0.15;
+    ctx.font = "12px 'Press Start 2P', monospace";
+    ctx.fillStyle = '#c2568f';
+    ctx.textAlign = 'center';
+    ctx.fillText(d.texto, d.x, d.y);
+    ctx.restore();
+  });
+
+  // --- suelo ---
+  const suelo = plataformas[0];
+  ctx.fillStyle = CONFIG.COLORES.plataformaB;
+  ctx.fillRect(suelo.x, suelo.y, suelo.w, suelo.h);
+  ctx.fillStyle = CONFIG.COLORES.plataformaBorde;
+  ctx.fillRect(suelo.x, suelo.y, suelo.w, 6);
+
+  // --- plataformas flotantes ---
+  plataformas.filter(p=>p.color==='flotante').forEach((p,i)=>{
+    ctx.fillStyle = i%2===0 ? CONFIG.COLORES.plataformaA : CONFIG.COLORES.plataformaB;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = CONFIG.COLORES.plataformaBorde;
+    ctx.fillRect(p.x, p.y, p.w, 4);
+  });
+
+  // --- obstáculos (arbustos redonditos) ---
+  obstaculos.forEach(o=>{
+    ctx.fillStyle = '#7bc9a0';
+    ctx.beginPath();
+    ctx.ellipse(o.x+o.w/2, o.y+o.h/2, o.w/2, o.h/2, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#4f9c76';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // --- monedas ---
+  monedas.forEach(m=>{
+    if(!m.viva) return;
+    const escalaX = Math.abs(Math.cos(m.giro));
+    ctx.save();
+    ctx.translate(m.x, m.y);
+    ctx.scale(escalaX, 1);
+    ctx.font = '26px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor = '#ffd76b';
+    ctx.shadowBlur = 14;
+    ctx.fillText('❤️', 0, 0);
+    ctx.restore();
+  });
+
+  // --- partículas de brillo ---
+  particulas.forEach(p=>{
+    ctx.globalAlpha = Math.max(0, p.vida/28);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // --- meta ---
+  dibujarMeta();
+
+  // --- jugador ---
+  dibujarPersonaje();
+
+  ctx.restore();
+}
+
+function dibujarNube(x,y,escala){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(escala,escala);
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.beginPath();
+  ctx.ellipse(0,0,38,18,0,0,Math.PI*2);
+  ctx.ellipse(28,-6,26,16,0,0,Math.PI*2);
+  ctx.ellipse(-28,-4,24,14,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function dibujarFlor(x,y){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.fillStyle = '#ff9fc3';
+  for(let i=0;i<5;i++){
+    const ang = i*(Math.PI*2/5);
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(ang)*5, Math.sin(ang)*5, 4, 3, ang, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#ffe38a';
+  ctx.beginPath();
+  ctx.arc(0,0,3,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function dibujarMeta(){
+  const pulso = 1 + Math.sin(tiempo*0.08)*0.08;
+  ctx.save();
+  ctx.translate(meta.x, meta.y);
+  ctx.scale(pulso, pulso);
+  ctx.shadowColor = '#ff6b9d';
+  ctx.shadowBlur = 30;
+  ctx.font = '64px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('💖', 0, 0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.font = "10px 'Press Start 2P', monospace";
+  ctx.fillStyle = '#c2568f';
+  ctx.textAlign = 'center';
+  ctx.globalAlpha = 0.8;
+  ctx.fillText('❤️ LLEGA AQUÍ ❤️', meta.x, meta.y-70);
+  ctx.restore();
+}
+
+function dibujarPersonaje(){
+  const p = player;
+  const cx = p.x + p.w/2;
+  const bob = p.onGround && p.caminando ? Math.sin(p.cicloAnim)*2 : 0;
+  const saltando = !p.onGround;
+
+  ctx.save();
+  ctx.translate(cx, p.y + p.h/2 + bob);
+  ctx.scale(p.mirando, 1);
+
+  // sombra
+  ctx.save();
+  ctx.translate(0, p.h/2 + 6 - bob);
+  ctx.fillStyle = 'rgba(107,91,149,.25)';
+  ctx.beginPath();
+  ctx.ellipse(0,0, p.w/2, 5, 0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // piernas (animación caminar / salto)
+  ctx.fillStyle = CONFIG.COLORES.personajeSombra;
+  const piernaOffset = p.caminando && p.onGround ? Math.sin(p.cicloAnim)*6 : (saltando ? 4 : 0);
+  ctx.fillRect(-9, 10, 7, 12 - (saltando?4:0));
+  ctx.fillRect(2, 10 - piernaOffset*0, 7, 12);
+  if(p.caminando && p.onGround){
+    ctx.fillRect(-9, 10 + Math.max(0,piernaOffset), 7, 12 - Math.abs(piernaOffset));
+    ctx.fillRect(2, 10 - Math.min(0,piernaOffset), 7, 12 - Math.abs(piernaOffset));
+  }
+
+  // cuerpo (pixel-block redondeado)
+  ctx.fillStyle = CONFIG.COLORES.personaje;
+  redondeado(-11, -14, 22, 26, 6);
+  ctx.fill();
+
+  // mejilla sonrojada
+  ctx.fillStyle = 'rgba(255,120,150,.55)';
+  ctx.beginPath();
+  ctx.arc(6,-2,3,0,Math.PI*2);
+  ctx.fill();
+
+  // ojo
+  ctx.fillStyle = '#4a2545';
+  ctx.beginPath();
+  ctx.arc(4,-6,2.2,0,Math.PI*2);
+  ctx.fill();
+
+  // moño / corazoncito en la cabeza
+  ctx.font = '14px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('💗', -2, -22);
+
+  // brazos
+  ctx.fillStyle = CONFIG.COLORES.personaje;
+  const brazoAngulo = saltando ? -0.6 : (p.caminando ? Math.sin(p.cicloAnim+Math.PI)*0.4 : 0);
+  ctx.save();
+  ctx.translate(10,-4);
+  ctx.rotate(brazoAngulo);
+  ctx.fillRect(0,-3,10,6);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function redondeado(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+/* ================================================================
+   🔁 LOOP PRINCIPAL
+   ================================================================ */
+function loop(){
+  if(!juegoActivo) return;
+  actualizar();
+  dibujar();
+  requestAnimationFrame(loop);
+}
+
+/* ================================================================
+   🏁 GANAR NIVEL
+   ================================================================ */
+function ganarNivel(){
+  juegoActivo = false;
+  sonidoVictoria();
+  setTimeout(()=>{
+    document.getElementById('gameContainer').style.display = 'none';
+    mostrarVictoria();
+  }, 550);
+}
+
+function mostrarVictoria(){
+  const pantalla = document.getElementById('victoryScreen');
+  pantalla.style.display = 'flex';
+  lanzarConfeti();
+}
+
+function lanzarConfeti(){
+  const cont = document.getElementById('confetti');
+  cont.innerHTML = '';
+  const simbolos = ['❤️','💗','💖','💕','✨'];
+  for(let i=0;i<45;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.textContent = simbolos[Math.floor(Math.random()*simbolos.length)];
+    el.style.left = Math.random()*100+'vw';
+    el.style.animationDuration = (2.5 + Math.random()*2.5)+'s';
+    el.style.animationDelay = (Math.random()*1.2)+'s';
+    el.style.fontSize = (14+Math.random()*16)+'px';
+    cont.appendChild(el);
+  }
+  setTimeout(()=>{ cont.innerHTML=''; }, 6000);
+}
+
+/* ================================================================
+   💗 FONDOS DECORATIVOS (corazones/flores flotando en overlays)
+   ================================================================ */
+function generarFlotantes(contenedorId, cantidad){
+  const cont = document.getElementById(contenedorId);
+  if(!cont) return;
+  cont.innerHTML = '';
+  const simbolos = ['❤️','💗','🌸','✨','💫'];
+  for(let i=0;i<cantidad;i++){
+    const el = document.createElement('div');
+    el.className = 'flotante';
+    el.textContent = simbolos[Math.floor(Math.random()*simbolos.length)];
+    el.style.left = Math.random()*100+'vw';
+    el.style.fontSize = (14+Math.random()*20)+'px';
+    el.style.animationDuration = (7+Math.random()*8)+'s';
+    el.style.animationDelay = (Math.random()*6)+'s';
+    cont.appendChild(el);
+  }
+}
+generarFlotantes('startDecor', 16);
+generarFlotantes('victoryDecor', 16);
+generarFlotantes('letterDecor', 16);
+
+/* ================================================================
+   💌 CARTA DE AMOR
+   ================================================================ */
+const envelope = document.getElementById('envelope');
+const cartaBox = document.getElementById('cartaBox');
+const cartaTexto = document.getElementById('cartaTexto');
+let cartaAbierta = false;
+
+envelope.addEventListener('click', ()=>{
+  if(cartaAbierta) return;
+  cartaAbierta = true;
+  envelope.classList.add('abierto');
+
+  // música opcional
+  if(CONFIG.MUSICA_URL){
+    const audio = document.getElementById('musicaFondo');
+    audio.src = CONFIG.MUSICA_URL;
+    audio.volume = 0.5;
+    audio.play().catch(()=>{ /* el navegador bloqueó el autoplay, no pasa nada */ });
+  }
+
+  setTimeout(()=>{
+    envelope.style.display = 'none';
+    cartaBox.style.display = 'block';
+    escribirCarta();
+  }, 650);
+});
+
+function escribirCarta(){
+  const texto = CONFIG.CARTA_TEXTO;
+  let i = 0;
+  cartaTexto.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor-escritura';
+  cursor.textContent = '\u00A0';
+
+  const intervalo = setInterval(()=>{
+    cartaTexto.textContent = texto.slice(0, i);
+    cartaTexto.appendChild(cursor);
+    i++;
+    cartaBox.scrollTop = cartaBox.scrollHeight;
+    if(i > texto.length){
+      clearInterval(intervalo);
+      cursor.remove();
+      document.getElementById('cartaFirma').style.opacity = 1;
+      const boton = document.getElementById('volverJugar');
+      boton.classList.remove('oculto');
+      requestAnimationFrame(()=> boton.style.opacity = 1);
+    }
+  }, 22);
+}
+
+document.getElementById('volverJugar').addEventListener('click', reiniciarTodo);
+
+/* ================================================================
+   🔘 BOTONES PRINCIPALES
+   ================================================================ */
+document.getElementById('btnComenzar').addEventListener('click', ()=>{
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameContainer').style.display = 'flex';
+  iniciarPartida();
+});
+
+document.getElementById('btnAbrirRegalo').addEventListener('click', ()=>{
+  document.getElementById('victoryScreen').style.display = 'none';
+  document.getElementById('letterScreen').style.display = 'flex';
+});
+
+function iniciarPartida(){
+  monedasRecolectadas = 0;
+  document.getElementById('contadorMonedas').textContent = 0;
+  generarMundo();
+  juegoActivo = true;
+  requestAnimationFrame(loop);
+}
+
+function reiniciarTodo(){
+  // reset carta
+  cartaAbierta = false;
+  envelope.classList.remove('abierto');
+  envelope.style.display = 'block';
+  cartaBox.style.display = 'none';
+  cartaTexto.textContent = '';
+  document.getElementById('cartaFirma').style.opacity = 0;
+  const boton = document.getElementById('volverJugar');
+  boton.style.opacity = 0;
+  boton.classList.add('oculto');
+  const audio = document.getElementById('musicaFondo');
+  audio.pause(); audio.currentTime = 0;
+
+  // volver a pantalla de inicio
+  document.getElementById('letterScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+}
+
+/* dibuja un primer frame estático detrás de la pantalla de inicio */
+generarMundo();
+dibujar();
+</script>
+</body>
+</html>
